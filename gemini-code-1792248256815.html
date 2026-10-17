@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jane Piter Confecção Ltda ME - Sistema de Produção & Fiscal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://lucide.dev/lucide.min.js"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+    <div id="app" class="flex flex-col md:flex-row min-h-screen">
+        <!-- Sidebar Navigation -->
+        <aside class="bg-slate-900 text-white w-full md:w-64 flex-shrink-0">
+            <div class="p-4 border-b border-slate-800 flex items-center gap-3">
+                <svg width="40" height="40" viewBox="0 0 100 100" class="flex-shrink-0">
+                    <path d="M 10 30 C 30 10, 80 10, 90 35 C 70 20, 25 35, 20 85 C 15 90, 8 70, 10 30 Z" fill="#00A8CC"/>
+                    <path d="M 50 35 C 75 40, 85 65, 55 70 C 45 72, 40 60, 50 50 C 65 40, 80 50, 75 75 C 65 90, 35 85, 40 65" fill="none" stroke="#000" stroke-width="8" stroke-linecap="round"/>
+                    <g transform="rotate(-15 65 80)">
+                        <rect x="40" y="78" width="50" height="6" rx="3" fill="#000"/>
+                        <circle cx="48" cy="86" r="4" fill="#000"/><circle cx="48" cy="86" r="2" fill="#FFF"/>
+                        <circle cx="82" cy="86" r="4" fill="#000"/><circle cx="82" cy="86" r="2" fill="#FFF"/>
+                    </g>
+                </svg>
+                <div>
+                    <h1 class="font-bold text-sm leading-tight text-cyan-400">JANE PITER</h1>
+                    <p class="text-[10px] text-gray-400">Confecção & Estamparia</p>
+                </div>
+            </div>
+            <nav class="p-2 space-y-1 text-sm">
+                <button onclick="switchTab('kanban')" class="w-full text-left px-3 py-2.5 rounded flex items-center gap-2 hover:bg-slate-800 transition"><i data-lucide="layout-dashboard"></i> Produção (Kanban)</button>
+                <button onclick="switchTab('pedidos')" class="w-full text-left px-3 py-2.5 rounded flex items-center gap-2 hover:bg-slate-800 transition"><i data-lucide="shopping-bag"></i> Novo Pedido</button>
+                <button onclick="switchTab('clientes')" class="w-full text-left px-3 py-2.5 rounded flex items-center gap-2 hover:bg-slate-800 transition"><i data-lucide="users"></i> Clientes</button>
+                <button onclick="switchTab('financeiro')" class="w-full text-left px-3 py-2.5 rounded flex items-center gap-2 hover:bg-slate-800 transition"><i data-lucide="dollar-sign"></i> Financeiro & Caixa</button>
+                <button onclick="switchTab('fiscal')" class="w-full text-left px-3 py-2.5 rounded flex items-center gap-2 hover:bg-slate-800 transition"><i data-lucide="file-text"></i> Emissão NF-e / NFC-e</button>
+            </nav>
+        </aside>
+
+        <!-- Main Content View -->
+        <main class="flex-1 p-4 md:p-6 overflow-x-hidden">
+            <header class="bg-white p-4 rounded-lg shadow mb-6 flex flex-wrap justify-between items-center gap-4">
+                <div>
+                    <h2 id="pageTitle" class="text-xl font-bold text-gray-800">Painel de Produção</h2>
+                    <p class="text-xs text-gray-500">CNPJ: 13.230.698/0001-83 | Rua Campo Grande, 2110 - RJ</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="bg-green-100 text-green-800 text-xs px-2.5 py-1 rounded-full font-medium">SEFAZ Online</span>
+                </div>
+            </header>
+
+            <!-- Render Dynamic Tabs Here -->
+            <div id="contentArea"></div>
+        </main>
+    </div>
+
+    <script>
+        // Data Store Init
+        let orders = JSON.parse(localStorage.getItem('jp_orders')) || [
+            { id: '1001', cliente: 'UNU Brand', prod: 'Camisa Raglan DTF', qtd: 30, unit: 35.00, total: 1050.00, sinal: 525.00, status: 'Arte', img: 'https://placehold.co/100x100?text=Mockup+UNU' },
+            { id: '1002', cliente: 'Pedro Henrique', prod: 'Uniforme Sublimação', qtd: 50, unit: 40.00, total: 2000.00, sinal: 1000.00, status: 'Estamparia', img: 'https://placehold.co/100x100?text=Sublimacao' }
+        ];
+
+        function switchTab(tab) {
+            const content = document.getElementById('contentArea');
+            if(tab === 'kanban') {
+                document.getElementById('pageTitle').innerText = 'Chão de Fábrica (Produção)';
+                content.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                        ${['Arte', 'Corte', 'Estamparia', 'Costura', 'Acabamento', 'Expedição'].map(st => `
+                            <div class="bg-gray-200 p-3 rounded-lg min-h-[400px]">
+                                <h3 class="font-bold text-xs uppercase text-gray-600 mb-3">${st}</h3>${orders.filter(o => o.status === st).map(o => `
+                                    <div class="bg-white p-3 rounded shadow mb-3 text-xs space-y-2">
+                                        <img src="${o.img}" class="w-full h-20 object-cover rounded">
+                                        <p class="font-bold text-gray-800">#${o.id} - ${o.cliente}</p>
+                                        <p class="text-gray-600">${o.prod}</p>
+                                        <p class="font-semibold text-cyan-600">${o.qtd} un x R$ ${o.unit.toFixed(2)}</p>
+                                        <p class="font-bold text-gray-900">Total: R$ ${o.total.toFixed(2)}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                content.innerHTML = `<div class="bg-white p-6 rounded shadow text-center text-gray-500">Módulo ${tab.toUpperCase()} carregado com sucesso. Selecione as opções no menu lateral para interagir.</div>`;
+            }
+            if(window.lucide) lucide.createIcons();
+        }
+
+        // Initialize App
+        window.onload = () => switchTab('kanban');
+    </script>
+</body>
+</html>
